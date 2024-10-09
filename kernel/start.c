@@ -15,6 +15,9 @@ void
 start()
 {
   // set M Previous Privilege mode to Supervisor, for mret.
+  //   r_mstatus() 获取当前的机器状态寄存器的值。
+  // 清除 MSTATUS_MPP_MASK（机器上一个特权级别）并设置为超级用户模式（MSTATUS_MPP_S）。
+  // w_mstatus(x) 写回修改后的状态寄存器。
   unsigned long x = r_mstatus();
   x &= ~MSTATUS_MPP_MASK;
   x |= MSTATUS_MPP_S;
@@ -22,9 +25,12 @@ start()
 
   // set M Exception Program Counter to main, for mret.
   // requires gcc -mcmodel=medany
+  // w_mepc((uint64)main) 将异常程序计数器设置为 main 函数的地址，
+  // 以便在触发中断或异常时返回到这个地址。
   w_mepc((uint64)main);
 
   // disable paging for now.
+  // w_satp(0) 将页表基地址寄存器（SATP）设置为 0，禁用虚拟内存。
   w_satp(0);
 
   // delegate all interrupts and exceptions to supervisor mode.
